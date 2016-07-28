@@ -46,7 +46,7 @@ pub struct Program {
 /// user friendly implementation.
 impl Program {
 
-    /// parses the given string and returns a brainfuck instruction list.
+    /// parses the given string and returns a brainfuck instructions.
     ///
     /// #Example
     /// ```
@@ -54,16 +54,16 @@ impl Program {
     /// let program = Program::new(instructions, vec![0; 30000]);
     /// ```
     pub fn parse(code: &'static str) -> Result<Vec<char>, Error> {
-        let insmands = code.chars().map(|c| c as char).filter(|c| {
+        let ins = code.chars().map(|c| c as char).filter(|c| {
             match *c {
                 '>' | '<' | '+' | '-' | '.' | ',' | '[' | ']' => true,
                 _ => false
             }
         }).collect::<Vec<char>>();
-        let valid = insmands.iter().fold(0, |acc, c| {
+        let valid = ins.iter().fold(0, |acc, c| {
             match *c { '[' => acc + 1, ']' => acc - 1, _ => acc }
         });
-        match valid { 0 => Ok(insmands), _ => Err(Error::InvalidProgram) }
+        match valid { 0 => Ok(ins), _ => Err(Error::InvalidProgram) }
     }
 
     /// creates a program from the given program string.
