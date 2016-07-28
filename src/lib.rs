@@ -4,7 +4,7 @@ brainfuck-rs - a brainfuck interpreter in rust.
 
 The MIT License (MIT)
 
-Copyright (c) 2016 Haydn Paterson (sinclair) <haydn.developer@gmail.com>
+Copyright (c) 2016 Haydn Paterson (sinclair) <haydn.developer@gmail.ins>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -30,15 +30,15 @@ THE SOFTWARE.
 pub enum Error {
     InvalidProgram,
     InvalidInstruction,
-    ComPtrOutOfBounds(i32),
+    InsPtrOutOfBounds(i32),
     MemPtrOutOfBounds(i32),
 }
 
 /// brainfuck program
 pub struct Program {
-    com       : Vec<char>,
+    ins       : Vec<char>,
     mem       : Vec<u8>,
-    com_ptr   : usize,
+    ins_ptr   : usize,
     mem_ptr   : usize,
     io_in     : Box<FnMut()   -> u8 + Send + 'static>,
     io_out    : Box<FnMut(u8) -> () + Send + 'static>
@@ -54,16 +54,16 @@ impl Program {
     /// let program = Program::new(instructions, vec![0; 30000]);
     /// ```
     pub fn parse(code: &'static str) -> Result<Vec<char>, Error> {
-        let commands = code.chars().map(|c| c as char).filter(|c| {
+        let insmands = code.chars().map(|c| c as char).filter(|c| {
             match *c {
                 '>' | '<' | '+' | '-' | '.' | ',' | '[' | ']' => true,
                 _ => false
             }
         }).collect::<Vec<char>>();
-        let valid = commands.iter().fold(0, |acc, c| {
+        let valid = insmands.iter().fold(0, |acc, c| {
             match *c { '[' => acc + 1, ']' => acc - 1, _ => acc }
         });
-        match valid { 0 => Ok(commands), _ => Err(Error::InvalidProgram) }
+        match valid { 0 => Ok(insmands), _ => Err(Error::InvalidProgram) }
     }
 
     /// creates a program from the given program string.
@@ -88,11 +88,11 @@ impl Program  {
     /// ```
     /// let mut program = Program::new(vec!['.', ','], vec![0; 30000]);
     /// ``` 
-    pub fn new (com: Vec<char>, mem: Vec<u8>) -> Program {
+    pub fn new (ins: Vec<char>, mem: Vec<u8>) -> Program {
         Program {
-            com     : com,
+            ins     : ins,
             mem     : mem,
-            com_ptr : 0,
+            ins_ptr : 0,
             mem_ptr : 0, 
             io_out  : Box::new(|_| {}),
             io_in   : Box::new(|| 0u8) 
@@ -112,62 +112,62 @@ impl Program  {
 
     /// executes one instruction.    
     pub fn next(&mut self) -> Result<bool, Error> {
-        if self.com_ptr == self.com.len() { return Ok(true); }
-        match self.com[self.com_ptr] {
+        if self.ins_ptr == self.ins.len() { return Ok(true); }
+        match self.ins[self.ins_ptr] {
             '>' => { 
                 if self.mem_ptr == (self.mem.len() - 1) { return Err(Error::MemPtrOutOfBounds(1)); }
                 self.mem_ptr += 1; 
-                self.com_ptr += 1; },
+                self.ins_ptr += 1; },
             '<' => { 
                 if self.mem_ptr == 0 { return Err(Error::MemPtrOutOfBounds(-1)); }
                 self.mem_ptr -= 1; 
-                self.com_ptr += 1; },
+                self.ins_ptr += 1; },
             '+' => {
                 if self.mem[self.mem_ptr] == 255 {
                     self.mem[self.mem_ptr] = 0;
                 } else {
                     self.mem[self.mem_ptr] += 1;
-                } self.com_ptr += 1; 
+                } self.ins_ptr += 1; 
             },
             '-' => { 
                 if self.mem[self.mem_ptr] == 0 {
                     self.mem[self.mem_ptr] = 255;
                 } else {
                     self.mem[self.mem_ptr] -= 1;
-                } self.com_ptr += 1; 
+                } self.ins_ptr += 1; 
             },
             '.' => { 
                 (self.io_out)(self.mem[self.mem_ptr]);   
-                self.com_ptr += 1; 
+                self.ins_ptr += 1; 
             },
             ',' => { 
                 self.mem[self.mem_ptr] = (self.io_in)(); 
-                self.com_ptr += 1; 
+                self.ins_ptr += 1; 
             },
             '[' => {
                 if self.mem[self.mem_ptr] == 0 {
                     let mut n = 0;
                     loop {
-                        if self.com_ptr == self.com.len() { return Err(Error::ComPtrOutOfBounds(1)); }
-                        if self.com[self.com_ptr] == '[' { n += 1; }
-                        if self.com[self.com_ptr] == ']' { n -= 1; }
-                        self.com_ptr += 1;
+                        if self.ins_ptr == self.ins.len() { return Err(Error::InsPtrOutOfBounds(1)); }
+                        if self.ins[self.ins_ptr] == '[' { n += 1; }
+                        if self.ins[self.ins_ptr] == ']' { n -= 1; }
+                        self.ins_ptr += 1;
                         if n == 0 { break; }
                     }
-                } else { self.com_ptr += 1; }
+                } else { self.ins_ptr += 1; }
             },
             ']' => {
                 if self.mem[self.mem_ptr] != 0 {
                     let mut n = 0;
                     loop {
-                        if self.com_ptr == 0 { return Err(Error::ComPtrOutOfBounds(-1)); }
-                        if self.com[self.com_ptr] == ']' { n += 1; }
-                        if self.com[self.com_ptr] == '[' { n -= 1; }
-                        if n == 0 { self.com_ptr += 1; break; }
-                        self.com_ptr -= 1;
+                        if self.ins_ptr == 0 { return Err(Error::InsPtrOutOfBounds(-1)); }
+                        if self.ins[self.ins_ptr] == ']' { n += 1; }
+                        if self.ins[self.ins_ptr] == '[' { n -= 1; }
+                        if n == 0 { self.ins_ptr += 1; break; }
+                        self.ins_ptr -= 1;
                     }
                 } else { 
-                    self.com_ptr += 1; 
+                    self.ins_ptr += 1; 
                 }
             },
             _ => { return Err(Error::InvalidInstruction); }
