@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------
 
-brainfuck-rs - a rust implementation of the brainfuck programming language.
+brainfuck-rs - a brainfuck interpreter in rust.
 
 The MIT License (MIT)
 
@@ -25,8 +25,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
-
-use std::sync::mpsc::sync_channel;
 
 #[derive(Debug)]
 pub enum Error {
@@ -75,14 +73,9 @@ impl Program {
     /// let mut program = Program::create("+++++++.").unwrap();
     /// ```
     pub fn create(code: &'static str) -> Result<Program, Error> {
-        let program = Program {
-            com     : try!(Program::parse(code)),
-            mem     : vec![0; 30000],
-            com_ptr : 0,
-            mem_ptr : 0, 
-            io_out  : Box::new(|_| {}),
-            io_in   : Box::new(|| 0u8) 
-        }; Ok(program)
+        let ins = try!(Program::parse(code));
+        let mem = vec![0; 30000];
+        Ok(Program::new(ins, mem))
     }   
 }
 

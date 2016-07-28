@@ -1,13 +1,11 @@
 # brainfuck-rs
 
-a rust implementation of the brainfuck programming language.
+a brainfuck interpreter in rust.
 
 ```rust
 use brainfuck::Program;
 
 fn main() {
-
-    // Hello World!
     let mut program = Program::create("
     ++++++++[>++++[>++>+++>+++>+<<<<-]
     >+>+>->>+[<]<-]>>.>---.+++++++..++
@@ -23,17 +21,20 @@ fn main() {
 
 ## overview
 
-brainfuck-rs is a Rust implementation of the brainfuck programming language written
-as a experiment embedding simple programs within rust.
+brainfuck-rs is a small interpreter for the brainfuck programming language written in Rust. This project was written to 
+experiment with hosting a small vm inside of Rust and to explore various threading and io related concepts. This project
+was also written for fun.
 
-Information on the brainfuck language can be found at [https://en.wikipedia.org/wiki/Brainfuck](https://en.wikipedia.org/wiki/Brainfuck)
+information on the brainfuck language can be found at [https://en.wikipedia.org/wiki/Brainfuck](https://en.wikipedia.org/wiki/Brainfuck)
 
-Project offered as is for anyone who finds it useful.
+This project offered as is for anyone who finds it useful or interesting.
 
 ## running examples
 
 ```
 cargo run --example helloworld
+
 cargo run --example fibonacci
+
 cargo run --example mandelbrot
 ```
