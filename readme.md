@@ -15,13 +15,8 @@ fn main() {
     ++.
     ").unwrap();
 
-    // stdin - when the program read.
-    program.stdin  (Box::new (|| 0u8 )); 
-
-    // stdout - when the program writes.
+    program.stdin  (Box::new (|| 0u8 ));
     program.stdout (Box::new(|b| print!("{}", b as char))); 
-    
-    // go! 
     program.run().unwrap();
 }
 ```
